@@ -1,4 +1,5 @@
 from django.db import models
+# run this in terminal at this directory sales_tracker/backend ""python manage.py runserver"" to start server
 
 # Sales table
 class Sale(models.Model):
