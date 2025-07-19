@@ -1,6 +1,10 @@
-from django.urls import path
-from .views import create_sale
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import SaleViewSet
+
+router = DefaultRouter()
+router.register('sales', SaleViewSet, basename='sale')
 
 urlpatterns = [
-    path('sales/', create_sale, name='create_sale') # Maps web request to the create_sale view
+    path('', include(router.urls)),
 ]

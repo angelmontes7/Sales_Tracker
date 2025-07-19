@@ -18,7 +18,8 @@ client = discord.Client(intents=intents)
 API_URL = "http://127.0.0.1:8000/api/sales/"
 
 def send_sale_to_api(sale_data):
-    headers = {"Content-Type": "application/json"}
+    headers = {"Content-Type": "application/json",
+               "Authorization": f"Token {os.getenv('DJANGO_API_TOKEN')}"}
     try:
         response = requests.post(API_URL, json=sale_data, headers=headers) # stores the repose got from post request in response variable
         response.raise_for_status() # raises error if one occurs
