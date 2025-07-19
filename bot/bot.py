@@ -17,6 +17,22 @@ client = discord.Client(intents=intents)
 # Backend API url
 API_URL = "http://127.0.0.1:8000/api/sales/"
 
+CARRIER_KEYWORDS = {
+    "americo": "Americo",
+    "amam": "AmAm",
+    "am am": "AmAm",
+    "ethos": "Ethos",
+    "aetna": "Aetna",
+    "corebridge": "Corebridge",
+    "transunion": "Transunion",
+    "mu": "Mutual of Omaha",
+    "moo": "Mutual of Omaha",
+    "mo": "Mutual of Omaha",
+    "mutual of omaha": "Mutual of Omaha"
+}
+
+negative_verification_keywords = ["ho", "h/o", "home office"]
+
 def send_sale_to_api(sale_data):
     headers = {"Content-Type": "application/json",
                "Authorization": f"Token {os.getenv('DJANGO_API_TOKEN')}"}
@@ -47,6 +63,7 @@ async def on_message(message):
     
     # Number extraction and logging starts here:
     pattern = r"\$(\d+(?:,\d{3})*(?:\.\d+)?|\d+(?:\.\d+)?)" # regex pattern for pulling sale number out of message
+    date_pattern = r'\b\d{1,2}/\d{1,2}\b'
     matches = re.findall(pattern, message.content) # stores all occurences that match regex pattern into a list
 
     # Checks if list is not empty
@@ -54,17 +71,44 @@ async def on_message(message):
         raw_amount = matches[0].replace(',', '') # removes commas
         amount = float(raw_amount) if '.' in raw_amount else int(raw_amount) #converts string to integer or float
         time_iso = datetime.now(timezone.utc).isoformat() # Gets the timestamp for when the message was made
+        lower_message = message.content.lower() #convert message to lowercase
+
+        # loops through all keywords. First match breaks the loop and stores the carrier. no match stays None.
+        issued_carrier = None
+        for keyword, standard_name in CARRIER_KEYWORDS.items():
+            if keyword in lower_message:
+                issued_carrier = standard_name
+                break
+        
+        # if any of the negative_verification keywords are in message then is_verified is false otherwise its true
+        is_verified = not any(keyword in lower_message for keyword in negative_verification_keywords)
+
+        # Extract date_of_sale using regex search
+        date_match = re.search(date_pattern, message.content)
+        if date_match:
+            date_str = date_match.group(0)
+            try:
+                # Parse month/day
+                parsed_date = datetime.strptime(date_str, "%m/%d")
+                # Add current year
+                parsed_date = parsed_date.replace(year=datetime.now().year)
+                date_of_sale = parsed_date.strftime("%Y-%m-%d")  # Format: '2025-08-03'
+            except ValueError:
+                date_of_sale = None
+        else:
+            date_of_sale = None
+
         print(f"[{display_name}] sent sale of ${amount} at time: {time_iso}") # logs the result
 
         # Build the sale data dictionary
         sale_data = {
             "user_display_name": display_name,
             "amount": amount,
-            "issued_carrier": None,  # TODO create string parsing to extract carrier
+            "issued_carrier": issued_carrier, 
             "raw_message": message.content,
-            "is_verified": False, # TODO create string parsing to extract whether theres a home office message (HO)
+            "is_verified": is_verified,
             "timestamp": time_iso,
-            "date_of_sale": None # TODO create string parsing to extract whether it was a DOA or theres a date in the message
+            "date_of_sale": date_of_sale
         }
 
         # Send to backend API in a separate thread so bot doesn't freeze
