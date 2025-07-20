@@ -1,5 +1,6 @@
 import { useState } from 'react'
 
+
 function Login() {
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
@@ -11,7 +12,7 @@ function Login() {
         // TODO add login API calls here
     }
     return (
-        <div>
+        <div className='main_container'>
             <form onSubmit={handleSubmit}>
                 <h2>Login</h2>
                 <input 
