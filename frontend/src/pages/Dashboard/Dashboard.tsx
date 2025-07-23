@@ -1,5 +1,29 @@
 import './Dashboard.css'
+import { useEffect, useState } from 'react'
+import api from '../../api'
+
+interface Sale {
+  id: number
+  user_display_name: string
+  amount: number
+  issued_carrier: string | null
+  raw_message: string
+  is_verified: boolean
+  timestamp: string
+  date_of_sale: string | null
+}
+
 function Dashboard() {
+  const [sales, setSales] = useState<Sale[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+  api.get('/api/sales/')
+    .then(res => setSales(res.data))
+    .catch(err => console.error(err))
+    .finally(() => setLoading(false))
+  }, []) 
+
   return (
     <div className="layout-container">
       {/* Navbar */}
@@ -50,10 +74,37 @@ function Dashboard() {
           </div>
 
           <div className="content-section">
-            <h2>Main Content Area</h2>
-            <p>
-               main content area. 
-            </p>
+            <h1>Sales Dashboard</h1>
+            {loading ? (
+              <div>Loading sales...</div>
+            ) : (
+              <table style={{ width: '100%', background: 'white', borderRadius: 8, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Amount</th>
+                    <th>Carrier</th>
+                    <th>Verified</th>
+                    <th>Date of Sale</th>
+                    <th>Timestamp</th>
+                    <th>Message</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sales.map(sale => (
+                    <tr key={sale.id}>
+                      <td>{sale.user_display_name}</td>
+                      <td>${sale.amount}</td>
+                      <td>{sale.issued_carrier || '-'}</td>
+                      <td>{sale.is_verified ? '✅' : '❌'}</td>
+                      <td>{sale.date_of_sale || '-'}</td>
+                      <td>{new Date(sale.timestamp).toLocaleString()}</td>
+                      <td>{sale.raw_message}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </main>
       </div>
