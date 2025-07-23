@@ -55,3 +55,46 @@
     width: 300px;
     font-size: 20px;
 }
+
+/* Responsive Design */
+@media (max-width: 2560px) {
+  .error-content{
+    padding: 0px;
+  }
+  .error-code{
+    font-size: 10rem;
+  }
+  .square-dot{
+    width: 30px;
+    height: 30px;
+    margin-left: -10px;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .error-content{
+    padding: 0px;
+  }
+  
+  .error-code{
+    font-size: 4rem;
+  }
+
+  .error-title{
+    font-size: 20px;
+    margin-top: -20px;
+  }
+
+  .square-dot{
+    width: 10px;
+    height: 10px;
+    margin-left: -10px;
+  }
+  
+  .button-group{
+    width: 150px;
+    padding: 10px;
+    font-size: 10px;
+  }
+}
