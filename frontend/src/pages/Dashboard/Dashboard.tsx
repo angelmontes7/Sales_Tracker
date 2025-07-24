@@ -45,7 +45,7 @@ function Dashboard() {
     return {
       date: new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
       sales: daysSales.length,
-      revenue: daysSales.reduce((sum, sale) => sum + parseFloat(sale.amount || 0), 0),
+      revenue: daysSales.reduce((sum, sale) => sum + parseFloat(String(sale.amount || 0)), 0),
       verified: daysSales.filter(sale => sale.is_verified).length
     }
   })
@@ -56,7 +56,7 @@ function Dashboard() {
       acc[sale.user_display_name] = { sales: 0, revenue: 0, verified: 0 }
     }
     acc[sale.user_display_name].sales++
-    acc[sale.user_display_name].revenue += parseFloat(sale.amount || 0)
+    acc[sale.user_display_name].revenue += parseFloat(String(sale.amount || 0))
     if (sale.is_verified) acc[sale.user_display_name].verified++
     return acc
   }, {} as Record<string, { sales: number; revenue: number; verified: number }>)
